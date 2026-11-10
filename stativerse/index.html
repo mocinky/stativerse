@@ -1,0 +1,694 @@
+﻿<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="StatiVerse — media pembelajaran statistika interaktif untuk memahami Mean, Median, dan Modus." />
+  <title>StatiVerse — Dashboard Pembelajaran Statistika</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+
+    <!-- ================= SIDEBAR (gaya Gemini) ================= -->
+    <aside class="sidebar" id="sidebar" aria-label="Sidebar navigasi StatiVerse">
+
+      <!-- Baris atas: brand + ikon aksi -->
+      <div class="sidebar__top">
+        <a class="brand" href="#dashboard" data-menu-link="dashboard" aria-label="StatiVerse — ke Dashboard">
+          <span class="brand__mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 20V10" /><path d="M10 20V4" /><path d="M16 20v-7" /><path d="M22 20H2" />
+            </svg>
+          </span>
+          <span class="brand__name">StatiVerse</span>
+        </a>
+
+        <div class="sidebar__actions">
+          <button class="icon-btn" type="button" id="btn-sidebar-search" aria-label="Cari menu" aria-controls="sidebar-search" aria-expanded="false" title="Cari">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="7" /><path d="m16.5 16.5 4 4" />
+            </svg>
+          </button>
+          <button class="icon-btn" type="button" id="btn-sidebar-toggle" aria-label="Tutup sidebar" aria-controls="sidebar" aria-expanded="true" title="Tutup sidebar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="3" y="4" width="18" height="16" rx="2.5" /><path d="M9 4v16" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Pencarian di dalam sidebar -->
+      <div class="sidebar__search" id="sidebar-search" hidden>
+        <div class="search">
+          <svg class="search__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="7" /><path d="m16.5 16.5 4 4" />
+          </svg>
+          <input class="search__input" type="search" id="sidebar-search-input" placeholder="Cari menu atau topik..." autocomplete="off" aria-label="Cari menu atau topik" />
+        </div>
+      </div>
+
+      <!-- Navigasi utama -->
+      <nav class="nav" aria-label="Navigasi utama">
+        <ul class="nav__list" id="nav-list">
+          <li>
+            <a class="nav__item is-active" href="#dashboard" data-menu="dashboard" aria-current="page">
+              <span class="nav__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="7.5" height="7.5" rx="2" />
+                  <rect x="13.5" y="3" width="7.5" height="7.5" rx="2" />
+                  <rect x="3" y="13.5" width="7.5" height="7.5" rx="2" />
+                  <rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2" />
+                </svg>
+              </span>
+              <span class="nav__text">Dashboard</span>
+            </a>
+          </li>
+          <li>
+            <a class="nav__item" href="#materi" data-menu="materi">
+              <span class="nav__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v15H6.5A2.5 2.5 0 0 0 4 20.5Z" />
+                  <path d="M4 20.5A2.5 2.5 0 0 1 6.5 18H19v3H6.5A2.5 2.5 0 0 1 4 20.5Z" />
+                  <path d="M8.5 7.5h6" />
+                </svg>
+              </span>
+              <span class="nav__text">Materi</span>
+            </a>
+          </li>
+          <li>
+            <a class="nav__item" href="#permainan" data-menu="permainan">
+              <span class="nav__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7.5 8h9a5 5 0 0 1 4.9 4l.6 3.3A2.6 2.6 0 0 1 19 18.2a2.6 2.6 0 0 1-2.3-1.4l-.7-1.2H8l-.7 1.2A2.6 2.6 0 0 1 5 18.2a2.6 2.6 0 0 1-3-2.9L2.6 12A5 5 0 0 1 7.5 8Z" />
+                  <path d="M7 11v2.4" /><path d="M5.8 12.2h2.4" />
+                  <circle cx="15.9" cy="11.4" r=".95" fill="currentColor" stroke="none" />
+                  <circle cx="17.7" cy="13.2" r=".95" fill="currentColor" stroke="none" />
+                </svg>
+              </span>
+              <span class="nav__text">Permainan</span>
+            </a>
+          </li>
+          <li>
+            <a class="nav__item" href="#evaluasi" data-menu="evaluasi">
+              <span class="nav__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 3.5h6" />
+                  <path d="M10.5 3.5v1.8L6.2 12a3.6 3.6 0 0 0 2.3 5.2 9 9 0 0 0 7 0A3.6 3.6 0 0 0 17.8 12L13.5 5.3V3.5" />
+                  <path d="M7.6 13.5h8.8" />
+                </svg>
+              </span>
+              <span class="nav__text">Evaluasi</span>
+            </a>
+          </li>
+          <li>
+            <a class="nav__item" href="#pengembang" data-menu="pengembang">
+              <span class="nav__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="m8.5 8.5-4 3.5 4 3.5" />
+                  <path d="m15.5 8.5 4 3.5-4 3.5" />
+                  <path d="m13.5 5.5-3 13" />
+                </svg>
+              </span>
+              <span class="nav__text">Pengembang</span>
+            </a>
+          </li>
+        </ul>
+
+        <p class="nav__empty" id="nav-empty" hidden>Tidak ada menu yang cocok.</p>
+      </nav>
+
+      <!-- Profil di bagian bawah -->
+      <div class="sidebar__foot">
+        <div class="profile">
+          <span class="profile__avatar" id="profile-avatar" aria-hidden="true">SN</span>
+          <span class="profile__info">
+            <span class="profile__name" id="profile-name">Siswa Demo</span>
+            <span class="profile__role" id="profile-kelas">Kelas X</span>
+          </span>
+          <button class="icon-btn icon-btn--sm icon-btn--logout" type="button" id="btn-logout" aria-label="Keluar" title="Keluar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3" />
+              <path d="M10 17l-5-5 5-5" />
+              <path d="M5 12h10" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Latar gelap saat sidebar mobile terbuka -->
+    <button class="sidebar-scrim" type="button" id="sidebar-scrim" aria-label="Tutup sidebar" tabindex="-1"></button>
+
+    <!-- ================= MAIN ================= -->
+    <div class="shell">
+      <div class="main">
+
+        <!-- ---------- TOP HEADER ---------- -->
+        <header class="topbar" id="dashboard">
+          <div class="topbar__heading">
+            <button class="icon-btn icon-btn--toggle" type="button" id="btn-topbar-toggle" aria-label="Buka sidebar" aria-controls="sidebar" aria-expanded="false" title="Buka sidebar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="3" y="4" width="18" height="16" rx="2.5" /><path d="M9 4v16" />
+              </svg>
+            </button>
+            <div class="topbar__heading-text">
+              <p class="topbar__eyebrow" id="view-eyebrow">Statistika</p>
+              <h1 class="topbar__title" id="view-title">Dashboard Pembelajaran Statistika</h1>
+            </div>
+          </div>
+
+          <div class="topbar__tools">
+            <div class="pill pill--date">
+              <svg class="pill__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="3" y="5" width="18" height="16" rx="3" /><path d="M8 3v4" /><path d="M16 3v4" /><path d="M3 10h18" />
+              </svg>
+              <span>
+                <span class="pill__sub">Hari ini</span>
+                <span class="pill__main" id="today-date">Senin, 9 November 2026</span>
+              </span>
+            </div>
+
+            <div class="pill pill--status">
+              <span class="status-dot" aria-hidden="true"></span>
+              <span>
+                <span class="pill__sub">Status</span>
+                <span class="pill__main">Sesi belajar aktif</span>
+              </span>
+            </div>
+          </div>
+        </header>
+
+        <!-- ================= VIEW: DASHBOARD ================= -->
+        <div class="view is-active" id="view-dashboard" data-view="dashboard" role="tabpanel" aria-labelledby="nav-dashboard">
+
+        <!-- ---------- HERO BANNER ---------- -->
+        <section class="hero" aria-labelledby="hero-title">
+          <div class="hero__content">
+            <p class="hero__eyebrow">
+              <span class="hero__dot" aria-hidden="true"></span>
+              Semester Ganjil · Statistik Deskriptif
+            </p>
+            <h2 class="hero__title" id="hero-title">
+              Selamat datang di StatiVerse:
+              <span>Jelajahi Mean, Median &amp; Modus.</span>
+            </h2>
+            <p class="hero__desc">
+              Mulai dari memahami konsep, coba simulasi dengan datamu sendiri,
+              lalu uji pemahaman lewat kuis interaktif — semuanya dalam satu tempat.
+            </p>
+            <div class="hero__actions">
+              <a class="btn btn--primary" href="#materi">
+                Mulai Belajar
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M5 12h14" /><path d="m13 6 6 6-6 6" />
+                </svg>
+              </a>
+              <a class="btn btn--ghost" href="#simulasi">Coba Simulasi</a>
+            </div>
+          </div>
+
+          <div class="hero__visual" aria-hidden="true">
+            <div class="hero__glass">
+              <span class="hero__glass-label">Rata-rata nilai</span>
+              <span class="hero__glass-value">82,4</span>
+              <div class="hero__spark">
+                <span style="height: 34%"></span>
+                <span style="height: 58%"></span>
+                <span style="height: 42%"></span>
+                <span style="height: 74%"></span>
+                <span style="height: 60%"></span>
+                <span style="height: 92%"></span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ---------- SECTION: MATERI ---------- -->
+        <section class="section" id="materi" aria-labelledby="materi-title">
+          <div class="section__head">
+            <div>
+              <h2 class="section__title" id="materi-title">Ringkasan Materi</h2>
+              <p class="section__desc">Tiga ukuran pemusatan data yang wajib kamu kuasai.</p>
+            </div>
+            <a class="section__link" href="#simulasi">
+              Praktik sekarang
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M5 12h14" /><path d="m13 6 6 6-6 6" />
+              </svg>
+            </a>
+          </div>
+
+          <div class="cards-3">
+            <!-- Mean -->
+            <article class="card topic">
+              <header class="topic__head">
+                <span class="topic__badge topic__badge--mean" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 17 8 9l4 4 3-5 6 9" />
+                  </svg>
+                </span>
+                <span class="topic__index">01</span>
+              </header>
+              <h3 class="topic__title">Mean</h3>
+              <p class="topic__subtitle">Rata-rata</p>
+
+              <div class="topic__viz" aria-hidden="true">
+                <div class="mini-chart">
+                  <span style="height: 45%"></span>
+                  <span style="height: 70%"></span>
+                  <span style="height: 55%"></span>
+                  <span style="height: 85%"></span>
+                  <span style="height: 60%"></span>
+                </div>
+              </div>
+
+              <p class="topic__desc">
+                Jumlah seluruh data dibagi banyaknya data. Cocok untuk melihat
+                nilai rata-rata kelas secara keseluruhan.
+              </p>
+              <p class="topic__formula"><span>Mean</span> = &Sigma;x &divide; n</p>
+            </article>
+
+            <!-- Median -->
+            <article class="card topic">
+              <header class="topic__head">
+                <span class="topic__badge topic__badge--median" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 20V4" /><path d="M20 20V4" /><path d="M12 7v10" />
+                  </svg>
+                </span>
+                <span class="topic__index">02</span>
+              </header>
+              <h3 class="topic__title">Median</h3>
+              <p class="topic__subtitle">Nilai tengah</p>
+
+              <div class="topic__viz" aria-hidden="true">
+                <div class="mini-chart mini-chart--median">
+                  <span style="height: 40%"></span>
+                  <span style="height: 55%"></span>
+                  <span class="is-marked" style="height: 80%"></span>
+                  <span style="height: 60%"></span>
+                  <span style="height: 48%"></span>
+                </div>
+              </div>
+
+              <p class="topic__desc">
+                Nilai tengah setelah data diurutkan. Lebih tahan terhadap nilai
+                ekstrem (outlier) dibandingkan mean.
+              </p>
+              <p class="topic__formula"><span>Me</span> = data ke-(n+1)/2</p>
+            </article>
+
+            <!-- Modus -->
+            <article class="card topic">
+              <header class="topic__head">
+                <span class="topic__badge topic__badge--modus" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 20 20 7" /><circle cx="7" cy="8" r="2" /><circle cx="8" cy="14" r="2" /><circle cx="12" cy="11" r="2" />
+                  </svg>
+                </span>
+                <span class="topic__index">03</span>
+              </header>
+              <h3 class="topic__title">Modus</h3>
+              <p class="topic__subtitle">Paling sering muncul</p>
+
+              <div class="topic__viz" aria-hidden="true">
+                <div class="mini-chart mini-chart--modus">
+                  <span style="height: 35%"></span>
+                  <span style="height: 50%"></span>
+                  <span style="height: 92%"></span>
+                  <span style="height: 55%"></span>
+                  <span style="height: 30%"></span>
+                </div>
+              </div>
+
+              <p class="topic__desc">
+                Data yang frekuensinya paling banyak muncul. Satu data bisa
+                punya lebih dari satu modus atau tidak punya modus.
+              </p>
+              <p class="topic__formula"><span>Mo</span> = frekuensi tertinggi</p>
+            </article>
+          </div>
+        </section>
+
+        <!-- ---------- SECTION: SIMULASI ---------- -->
+        <section class="section" id="simulasi" aria-labelledby="simulasi-title">
+          <div class="section__head">
+            <div>
+              <h2 class="section__title" id="simulasi-title">Simulasi Data</h2>
+              <p class="section__desc">Masukkan datamu, lalu lihat hasil analisisnya secara visual.</p>
+            </div>
+            <span class="chip chip--info">Input &amp; Analisis</span>
+          </div>
+
+          <div class="card simulate">
+            <!-- Panel input -->
+            <div class="simulate__input">
+              <h3 class="card__title">Input Data</h3>
+              <p class="card__desc">
+                Tulis sekumpulan angka yang dipisahkan koma, spasi, atau baris baru.
+              </p>
+
+              <div class="field">
+                <label class="field__label" for="data-input">Kumpulan data</label>
+                <textarea
+                  class="field__control field__control--area"
+                  id="data-input"
+                  name="data"
+                  rows="5"
+                  placeholder="Contoh: 7, 8, 6, 9, 10, 8, 7, 8"></textarea>
+                <p class="field__hint">Minimal 3 angka. Desimal gunakan titik (mis. 7.5).</p>
+              </div>
+
+              <div class="field">
+                <span class="field__label" id="dataset-label">Coba dataset contoh</span>
+                <div class="chips" role="group" aria-labelledby="dataset-label">
+                  <button class="chip chip--btn" type="button">Nilai ulangan</button>
+                  <button class="chip chip--btn" type="button">Tinggi badan</button>
+                  <button class="chip chip--btn" type="button">Nilai ekstrem</button>
+                </div>
+              </div>
+
+              <div class="simulate__actions">
+                <button class="btn btn--primary" type="button" id="btn-analisis">Analisis Data</button>
+                <button class="btn btn--soft" type="button" id="btn-reset">Reset</button>
+              </div>
+            </div>
+
+            <!-- Panel hasil -->
+            <div class="simulate__result">
+              <div class="result__head">
+                <h3 class="card__title">Hasil Analisis</h3>
+                <span class="chip chip--muted" id="result-count">0 data terdeteksi</span>
+              </div>
+
+              <div class="stat-grid">
+                <div class="stat">
+                  <p class="stat__label">Mean</p>
+                  <p class="stat__value" id="result-mean">&mdash;</p>
+                  <p class="stat__foot">Rata-rata</p>
+                </div>
+                <div class="stat">
+                  <p class="stat__label">Median</p>
+                  <p class="stat__value" id="result-median">&mdash;</p>
+                  <p class="stat__foot">Nilai tengah</p>
+                </div>
+                <div class="stat">
+                  <p class="stat__label">Modus</p>
+                  <p class="stat__value" id="result-modus">&mdash;</p>
+                  <p class="stat__foot">Frekuensi tertinggi</p>
+                </div>
+              </div>
+
+              <div class="chartbox">
+                <div class="chartbox__head">
+                  <p class="chartbox__title">Distribusi Data</p>
+                  <p class="chartbox__legend">
+                    <span class="legend-dot legend-dot--bar" aria-hidden="true"></span> Frekuensi
+                    <span class="legend-dot legend-dot--line" aria-hidden="true"></span> Mean
+                  </p>
+                </div>
+                <div class="chartbox__area" id="chart-area" role="img" aria-label="Area grafik distribusi data, menunggu render JavaScript">
+                  <span class="chartbox__placeholder">Grafik akan ditampilkan di sini</span>
+                </div>
+              </div>
+
+              <div class="result__note" id="result-note" role="status" aria-live="polite">
+                Belum ada data dianalisis. Hasil mean, median, dan modus akan muncul di sini.
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ---------- SECTION: KUIS ---------- -->
+        <section class="section" id="kuis" aria-labelledby="kuis-title">
+          <div class="section__head">
+            <div>
+              <h2 class="section__title" id="kuis-title">Kuis Interaktif</h2>
+              <p class="section__desc">Uji pemahamanmu dengan 10 soal pilihan ganda.</p>
+            </div>
+            <span class="chip chip--warn">Belum dikerjakan</span>
+          </div>
+
+          <div class="card quiz">
+            <div class="quiz__aside">
+              <p class="quiz__eyebrow">Sesi kuis</p>
+              <h3 class="quiz__title">Ukuran Pemusatan Data</h3>
+              <ul class="quiz__meta">
+                <li><span>Soal</span><strong>10 butir</strong></li>
+                <li><span>Durasi</span><strong>&plusmn; 15 menit</strong></li>
+                <li><span>Level</span><strong>Dasar &ndash; Menengah</strong></li>
+              </ul>
+              <div class="quiz__progress">
+                <div class="quiz__progress-head">
+                  <span>Progres</span>
+                  <span id="quiz-progress-text">0 / 10</span>
+                </div>
+                <div class="quiz__bar" role="img" aria-label="Progres kuis 0 dari 10 soal">
+                  <span style="width: 0%"></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Arena kuis: konten soal dirender oleh JS -->
+            <div class="quiz__stage" id="quiz-stage" aria-live="polite">
+              <div class="quiz__empty">
+                <span class="quiz__empty-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 9a3 3 0 1 1 4.5 2.6c-.9.5-1.5 1.3-1.5 2.4v.5" />
+                    <circle cx="12" cy="18" r="1" fill="currentColor" stroke="none" />
+                    <circle cx="12" cy="12" r="9" />
+                  </svg>
+                </span>
+                <p class="quiz__empty-title">Kuis belum dimulai</p>
+                <p class="quiz__empty-desc">
+                  Soal, pilihan jawaban, dan umpan balik akan dimuat di area ini
+                  oleh JavaScript.
+                </p>
+                <button class="btn btn--primary" type="button" id="btn-mulai-kuis">Mulai Kuis</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        </div><!-- /view-dashboard -->
+
+        <!-- ================= VIEW: MATERI ================= -->
+        <div class="view" id="view-materi" data-view="materi" role="tabpanel" aria-labelledby="nav-materi">
+          <section class="section">
+           
+
+            <div class="card placeholder">
+              <span class="placeholder__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v15H6.5A2.5 2.5 0 0 0 4 20.5Z" />
+                  <path d="M4 20.5A2.5 2.5 0 0 1 6.5 18H19v3H6.5A2.5 2.5 0 0 1 4 20.5Z" />
+                </svg>
+              </span>
+              <p class="placeholder__title">Konten materi belum diisi</p>
+              <p class="placeholder__desc">
+                Area ini disiapkan untuk daftar materi. Konten akan ditambahkan
+                pada tahap pengembangan berikutnya.
+              </p>
+            </div>
+          </section>
+        </div><!-- /view-materi -->
+
+        <!-- ================= VIEW: PERMAINAN ================= -->
+        <div class="view" id="view-permainan" data-view="permainan" role="tabpanel" aria-labelledby="nav-permainan">
+          <section class="section">
+            
+
+            <div class="card placeholder">
+              <span class="placeholder__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7.5 8h9a5 5 0 0 1 4.9 4l.6 3.3A2.6 2.6 0 0 1 19 18.2a2.6 2.6 0 0 1-2.3-1.4l-.7-1.2H8l-.7 1.2A2.6 2.6 0 0 1 5 18.2a2.6 2.6 0 0 1-3-2.9L2.6 12A5 5 0 0 1 7.5 8Z" />
+                  <path d="M7 11v2.4" /><path d="M5.8 12.2h2.4" />
+                </svg>
+              </span>
+              <p class="placeholder__title">Konten permainan belum diisi</p>
+              <p class="placeholder__desc">
+                Area ini disiapkan untuk kuis berbasis permainan dan tantangan data.
+              </p>
+            </div>
+          </section>
+        </div><!-- /view-permainan -->
+
+        <!-- ================= VIEW: EVALUASI ================= -->
+        <div class="view" id="view-evaluasi" data-view="evaluasi" role="tabpanel" aria-labelledby="nav-evaluasi">
+          <section class="section">
+           
+            <!-- Grid card diisi oleh script.js dari data EVAL_PACKS -->
+            <div class="eval-grid" id="eval-grid"></div>
+
+            <!-- ============ RUNNER KUIS (disembunyikan sampai dimulai) ============ -->
+            <div class="quiz-runner" id="quiz-runner" hidden>
+
+              <!-- Kolom kiri: card soal -->
+              <div class="quiz-stage" id="quiz-stage">
+                <article class="q-card" id="q-card">
+                  <header class="q-card__head">
+                    <div>
+                      <h3 class="q-card__number" id="q-number">Soal 1</h3>
+                      <p class="q-card__type" id="q-type">Pilihan Ganda Sederhana</p>
+                    </div>
+                    <span class="q-card__level" id="q-level">Level 1: Pengetahuan</span>
+                  </header>
+
+                  <p class="q-card__indicator">
+                    <strong>Indikator:</strong>
+                    <span id="q-indicator">Mengidentifikasi istilah statistik.</span>
+                    <span class="q-card__tag" id="q-tag">Belajar Statistik</span>
+                  </p>
+
+                  <p class="q-card__question" id="q-question"></p>
+
+                  <div class="q-options" id="q-options" role="group" aria-labelledby="q-question"></div>
+
+                  <!-- Blok pembahasan, tampil setelah menjawab -->
+                  <div class="q-feedback" id="q-feedback" hidden>
+                    <p class="q-feedback__title" id="q-feedback-title">Pembahasan:</p>
+                    <p class="q-feedback__text" id="q-feedback-text"></p>
+                  </div>
+
+                  <footer class="q-card__foot">
+                    <p class="q-card__progress-text" id="q-progress-text">Soal 1 dari 10</p>
+                    <div class="q-card__nav">
+                      <button class="btn btn--soft" type="button" id="btn-prev">Sebelumnya</button>
+                      <button class="btn btn--primary" type="button" id="btn-next">Soal Berikutnya</button>
+                    </div>
+                  </footer>
+                </article>
+              </div>
+
+              <!-- Kolom kanan: laporan skor -->
+              <aside class="score-panel" id="score-panel" aria-label="Laporan skor">
+                <h3 class="score-panel__title">Laporan Skor</h3>
+
+                <div class="donut" id="donut">
+                  <svg viewBox="0 0 120 120" class="donut__svg" role="img" aria-labelledby="donut-label">
+                    <circle class="donut__track" cx="60" cy="60" r="46"></circle>
+                    <circle class="donut__ring donut__ring--correct" cx="60" cy="60" r="46"></circle>
+                    <circle class="donut__ring donut__ring--wrong" cx="60" cy="60" r="46"></circle>
+                  </svg>
+                  <span class="donut__label" id="donut-label">
+                    <span class="donut__value" id="donut-value">0%</span>
+                    <span class="donut__sub">Benar</span>
+                  </span>
+                </div>
+
+                <ul class="score-legend">
+                  <li><span class="legend-swatch legend-swatch--correct"></span>Benar</li>
+                  <li><span class="legend-swatch legend-swatch--wrong"></span>Salah</li>
+                  <li><span class="legend-swatch legend-swatch--empty"></span>Belum Dijawab</li>
+                </ul>
+
+                <dl class="score-stats">
+                  <div><dt>Total Soal</dt><dd id="stat-total">10</dd></div>
+                  <div><dt>Benar</dt><dd class="is-correct" id="stat-benar">0</dd></div>
+                  <div><dt>Salah</dt><dd class="is-wrong" id="stat-salah">0</dd></div>
+                </dl>
+
+                <div class="score-actions">
+                  <button class="btn btn--retry" type="button" id="btn-coba-lagi">Coba Lagi</button>
+                  <button class="btn btn--download" type="button" id="btn-unduh">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M12 3v12" /><path d="m7 11 5 5 5-5" /><path d="M4 21h16" />
+                    </svg>
+                    Unduh Hasil Evaluasi
+                  </button>
+                  <button class="btn btn--soft btn--back" type="button" id="btn-kembali-paket">Pilih Paket Lain</button>
+                </div>
+              </aside>
+            </div><!-- /quiz-runner -->
+          </section>
+        </div><!-- /view-evaluasi -->
+
+        <!-- ================= VIEW: PENGEMBANG ================= -->
+        <div class="view" id="view-pengembang" data-view="pengembang" role="tabpanel" aria-labelledby="nav-pengembang">
+          <section class="section">
+            <div class="section__head">
+              <div>
+                <h2 class="section__title">Pengembang</h2>
+                <p class="section__desc">Informasi proyek, kontributor, dan catatan rilis.</p>
+              </div>
+              <span class="chip chip--info">Segera hadir</span>
+            </div>
+
+            <div class="card placeholder">
+              <span class="placeholder__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="m8.5 8.5-4 3.5 4 3.5" />
+                  <path d="m15.5 8.5 4 3.5-4 3.5" />
+                  <path d="m13.5 5.5-3 13" />
+                </svg>
+              </span>
+              <p class="placeholder__title">Konten pengembang belum diisi</p>
+              <p class="placeholder__desc">
+                Area ini disiapkan untuk profil tim pengembang dan dokumentasi proyek.
+              </p>
+            </div>
+          </section>
+        </div><!-- /view-pengembang -->
+
+        <footer class="footer">
+          <p>&copy; 2026 StatiVerse &mdash; Media pembelajaran statistika interaktif.</p>
+        </footer>
+
+      </div>
+    </div>
+
+    <!-- ================= MODAL LOGIN ================= -->
+    <div class="modal" id="login-modal" role="dialog" aria-modal="true" aria-labelledby="login-title" hidden>
+      <div class="modal__backdrop" data-modal-close></div>
+
+      <div class="modal__panel" role="document">
+        <div class="modal__head">
+          <span class="modal__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 20V10" /><path d="M10 20V4" /><path d="M16 20v-7" /><path d="M22 20H2" />
+            </svg>
+          </span>
+          <h2 class="modal__title" id="login-title">Selamat datang di StatiVerse</h2>
+          <p class="modal__desc">
+            Isi nama dan kelasmu dulu ya. Data ini hanya disimpan di perangkatmu
+            sendiri untuk menyesuaikan tampilan belajar.
+          </p>
+        </div>
+
+        <form class="modal__form" id="login-form" novalidate>
+          <div class="field">
+            <label class="field__label" for="login-nama">Nama lengkap</label>
+            <input class="field__control" type="text" id="login-nama" name="nama" placeholder="Contoh: Budi" autocomplete="name" required maxlength="48" />
+            <p class="field__error" id="error-nama" role="alert" hidden>Nama minimal 3 karakter.</p>
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="login-kelas">Kelas</label>
+            <input class="field__control" type="text" id="login-kelas" name="kelas" placeholder="Contoh: IX A" autocomplete="off" required maxlength="24" />
+            <p class="field__error" id="error-kelas" role="alert" hidden>Kelas wajib diisi.</p>
+          </div>
+
+          <button class="btn btn--primary modal__submit" type="submit" id="btn-masuk">
+            Masuk
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12h14" /><path d="m13 6 6 6-6 6" />
+            </svg>
+          </button>
+        </form>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- html2pdf.js untuk unduh laporan evaluasi (dimuat lazy, aman bila offline) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" defer></script>
+  <script src="script.js"></script>
+</body>
+</html>
