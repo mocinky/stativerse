@@ -126,10 +126,10 @@
       <!-- Profil di bagian bawah -->
       <div class="sidebar__foot">
         <div class="profile">
-          <span class="profile__avatar" id="profile-avatar" aria-hidden="true">SN</span>
+          <span class="profile__avatar" id="profile-avatar" aria-hidden="true">?</span>
           <span class="profile__info">
-            <span class="profile__name" id="profile-name">Siswa Demo</span>
-            <span class="profile__role" id="profile-kelas">Kelas X</span>
+            <span class="profile__name" id="profile-name">Belum masuk</span>
+            <span class="profile__role" id="profile-kelas">Silakan login</span>
           </span>
           <button class="icon-btn icon-btn--sm icon-btn--logout" type="button" id="btn-logout" aria-label="Keluar" title="Keluar">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -185,7 +185,7 @@
         </header>
 
         <!-- ================= VIEW: DASHBOARD ================= -->
-        <div class="view is-active" id="view-dashboard" data-view="dashboard" role="tabpanel" aria-labelledby="nav-dashboard">
+        <div class="view is-active" id="view-dashboard" data-view="dashboard">
 
         <!-- ---------- HERO BANNER ---------- -->
         <section class="hero" aria-labelledby="hero-title">
@@ -414,7 +414,7 @@
                     <span class="legend-dot legend-dot--line" aria-hidden="true"></span> Mean
                   </p>
                 </div>
-                <div class="chartbox__area" id="chart-area" role="img" aria-label="Area grafik distribusi data, menunggu render JavaScript">
+                <div class="chartbox__area" id="chart-area" role="img" aria-label="Area grafik distribusi data">
                   <span class="chartbox__placeholder">Grafik akan ditampilkan di sini</span>
                 </div>
               </div>
@@ -431,7 +431,7 @@
           <div class="section__head">
             <div>
               <h2 class="section__title" id="kuis-title">Kuis Interaktif</h2>
-              <p class="section__desc">Uji pemahamanmu dengan 10 soal pilihan ganda.</p>
+              <p class="section__desc">Uji pemahamanmu lewat paket soal LOTS, MOTS, HOTS, dan Campuran.</p>
             </div>
             <span class="chip chip--warn">Belum dikerjakan</span>
           </div>
@@ -441,23 +441,14 @@
               <p class="quiz__eyebrow">Sesi kuis</p>
               <h3 class="quiz__title">Ukuran Pemusatan Data</h3>
               <ul class="quiz__meta">
-                <li><span>Soal</span><strong>10 butir</strong></li>
-                <li><span>Durasi</span><strong>&plusmn; 15 menit</strong></li>
-                <li><span>Level</span><strong>Dasar &ndash; Menengah</strong></li>
+                <li><span>Paket</span><strong>4 paket soal</strong></li>
+                <li><span>Bentuk</span><strong>Pilihan ganda</strong></li>
+                <li><span>Level</span><strong>Dasar &ndash; Lanjutan</strong></li>
               </ul>
-              <div class="quiz__progress">
-                <div class="quiz__progress-head">
-                  <span>Progres</span>
-                  <span id="quiz-progress-text">0 / 10</span>
-                </div>
-                <div class="quiz__bar" role="img" aria-label="Progres kuis 0 dari 10 soal">
-                  <span style="width: 0%"></span>
-                </div>
-              </div>
             </div>
 
             <!-- Arena kuis: konten soal dirender oleh JS -->
-            <div class="quiz__stage" id="quiz-stage" aria-live="polite">
+            <div class="quiz__stage" id="dash-quiz-stage">
               <div class="quiz__empty">
                 <span class="quiz__empty-icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
@@ -468,8 +459,8 @@
                 </span>
                 <p class="quiz__empty-title">Kuis belum dimulai</p>
                 <p class="quiz__empty-desc">
-                  Soal, pilihan jawaban, dan umpan balik akan dimuat di area ini
-                  oleh JavaScript.
+                  Pilih paket soal di menu Evaluasi. Setiap jawaban langsung
+                  dilengkapi pembahasan dan laporan skor.
                 </p>
                 <button class="btn btn--primary" type="button" id="btn-mulai-kuis">Mulai Kuis</button>
               </div>
@@ -480,7 +471,7 @@
         </div><!-- /view-dashboard -->
 
         <!-- ================= VIEW: MATERI ================= -->
-        <div class="view" id="view-materi" data-view="materi" role="tabpanel" aria-labelledby="nav-materi">
+        <div class="view" id="view-materi" data-view="materi">
           <section class="section">
            
 
@@ -501,7 +492,7 @@
         </div><!-- /view-materi -->
 
         <!-- ================= VIEW: PERMAINAN ================= -->
-        <div class="view" id="view-permainan" data-view="permainan" role="tabpanel" aria-labelledby="nav-permainan">
+        <div class="view" id="view-permainan" data-view="permainan">
           <section class="section">
             
 
@@ -521,7 +512,7 @@
         </div><!-- /view-permainan -->
 
         <!-- ================= VIEW: EVALUASI ================= -->
-        <div class="view" id="view-evaluasi" data-view="evaluasi" role="tabpanel" aria-labelledby="nav-evaluasi">
+        <div class="view" id="view-evaluasi" data-view="evaluasi">
           <section class="section">
            
             <!-- Grid card diisi oleh script.js dari data EVAL_PACKS -->
@@ -611,7 +602,7 @@
         </div><!-- /view-evaluasi -->
 
         <!-- ================= VIEW: PENGEMBANG ================= -->
-        <div class="view" id="view-pengembang" data-view="pengembang" role="tabpanel" aria-labelledby="nav-pengembang">
+        <div class="view" id="view-pengembang" data-view="pengembang">
           <section class="section">
             <div class="section__head">
               <div>

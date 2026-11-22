@@ -121,12 +121,30 @@
     setSidebar(saved === "1");
   })();
 
-  window.addEventListener("resize", syncToggleA11y);
-
+  // Saat melewati breakpoint: masuk mobile -> tutup sidebar,
+  // kembali ke desktop -> pulihkan preferensi tersimpan.
+  var wasMobile = isMobile();
   var resizeTimer = null;
   window.addEventListener("resize", function () {
     window.clearTimeout(resizeTimer);
-    resizeTimer = window.setTimeout(syncToggleA11y, 150);
+    resizeTimer = window.setTimeout(function () {
+      var nowMobile = isMobile();
+      if (nowMobile !== wasMobile) {
+        wasMobile = nowMobile;
+        if (nowMobile) {
+          setSidebar(true);
+        } else {
+          var saved = null;
+          try {
+            saved = window.localStorage.getItem(STORAGE_KEY);
+          } catch (err) {
+            saved = null;
+          }
+          setSidebar(saved === "1");
+        }
+      }
+      syncToggleA11y();
+    }, 150);
   });
 
   /* ---------- 2. MENU AKTIF & PANEL VIEW ---------- */
@@ -363,6 +381,13 @@
     loginModal.hidden = !open;
     document.body.classList.toggle("is-modal-open", open);
 
+    // Konten di belakang modal tidak boleh bisa difokus/diklik
+    [sidebar, scrim, document.querySelector(".shell")].forEach(function (el) {
+      if (el) {
+        el.inert = open;
+      }
+    });
+
     if (open && loginNama && !loginNama.value) {
       // Prefill dari data tersimpan bila ada, lalu fokus ke field pertama
       var siswa = getSiswa();
@@ -419,30 +444,37 @@
     });
   }
 
-  // Hapus penanda error begitu pengguna mengetik ulang
-  [loginNama, loginKelas].forEach(function (input) {
+  // Hapus penanda & pesan error begitu pengguna mengetik ulang
+  [
+    [loginNama, errorNama],
+    [loginKelas, errorKelas]
+  ].forEach(function (pair) {
+    var input = pair[0];
     if (input) {
       input.addEventListener("input", function () {
-        input.classList.remove("is-invalid");
-        input.setAttribute("aria-invalid", "false");
+        setFieldError(input, pair[1], false);
       });
     }
   });
 
+  /** Kosongkan widget profil (belum login). */
+  function renderEmptyProfile() {
+    if (profileAvatar) {
+      profileAvatar.textContent = "?";
+    }
+    if (profileName) {
+      profileName.textContent = "Belum masuk";
+      profileName.removeAttribute("title");
+    }
+    if (profileKelas) {
+      profileKelas.textContent = "Silakan login";
+    }
+  }
+
   if (btnLogout) {
     btnLogout.addEventListener("click", function () {
       clearSiswa();
-
-      if (profileAvatar) {
-        profileAvatar.textContent = "?";
-      }
-      if (profileName) {
-        profileName.textContent = "Belum masuk";
-        profileName.removeAttribute("title");
-      }
-      if (profileKelas) {
-        profileKelas.textContent = "Silakan login";
-      }
+      renderEmptyProfile();
 
       if (loginForm) {
         loginForm.reset();
@@ -456,13 +488,43 @@
 
   // Modal login wajib tampil bila data siswa belum tersimpan
   (function initLogin() {
-    if (getSiswa()) {
-      renderProfile(getSiswa());
+    var siswa = getSiswa();
+    if (siswa) {
+      renderProfile(siswa);
       toggleLoginModal(false);
     } else {
+      renderEmptyProfile();
       toggleLoginModal(true);
     }
   })();
+
+  /* ---------- 4b. TANGGAL HARI INI ---------- */
+  (function renderToday() {
+    var el = document.getElementById("today-date");
+    if (!el) {
+      return;
+    }
+    try {
+      el.textContent = new Date().toLocaleDateString("id-ID", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+      });
+    } catch (err) {
+      /* biarkan teks bawaan */
+    }
+  })();
+
+  /** Escape teks sebelum disisipkan lewat innerHTML. */
+  function escapeHTML(value) {
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
 
   /* ---------- 5. EVALUASI: DATA & RENDER CARD ---------- */
 
@@ -561,8 +623,6 @@
     grid.innerHTML = EVAL_PACKS.map(buildEvalCard).join("");
   }
 
-  renderEvalCards();
-
   // Delegasi klik untuk tombol "Mulai Kuis"
   (function bindEvalButtons() {
     var grid = document.getElementById("eval-grid");
@@ -656,7 +716,7 @@
     mots: [
       {
         q: "Diberikan data: 6, 7, 7, 8, 9, 10, 10, 10. Nilai mean dari data tersebut adalah...",
-        opsi: ["8.0", "8.375", "8.5", "9.0"],
+        opsi: ["8", "8,375", "8,5", "9"],
         jawaban: 1,
         indikator: "Menghitung mean dari data tunggal.",
         level: "Level 1: Pengetahuan",
@@ -666,7 +726,7 @@
       },
       {
         q: "Data: 5, 6, 7, 8, 9, 10 (n = 6). Nilai mediannya adalah...",
-        opsi: ["7", "7.5", "8", "8.5"],
+        opsi: ["7", "7,5", "8", "8,5"],
         jawaban: 1,
         indikator: "Menghitung median data berjumlah genap.",
         level: "Level 2: Pemahaman",
@@ -675,19 +735,20 @@
           "(7 + 8) ÷ 2 = 7,5."
       },
       {
-        q: "Nilai ulangan: 70, 75, 80, 85, 90, 95, 100. Jika satu siswa mendapat 100, pernyataan yang tepat adalah...",
+        q: "Nilai ulangan 7 siswa: 70, 75, 80, 85, 90, 95, 100. Jika ditambahkan satu siswa lagi yang mendapat nilai 100, pernyataan yang tepat adalah...",
         opsi: [
           "Median berubah, modus tetap",
           "Median dan mean sama-sama 85",
           "Mean lebih besar daripada median",
           "Mean lebih kecil daripada median"
         ],
-        jawaban: 2,
-        indikator: "Membandingkan mean dan median pada data condong.",
+        jawaban: 3,
+        indikator: "Membandingkan mean dan median setelah data ditambah.",
         level: "Level 3: Penerapan",
         pembahasan:
-          "Mean awal = 595 ÷ 7 = 85, median = 85. Bila ditambah nilai 100, mean naik menjadi " +
-          "sekitar 86,88 sedangkan median tetap 85 — mean lebih besar dari median saat data condong ke kanan."
+          "Setelah ditambah nilai 100, data menjadi 70, 75, 80, 85, 90, 95, 100, 100 (n = 8). " +
+          "Mean = 695 ÷ 8 = 86,875, sedangkan median = (85 + 90) ÷ 2 = 87,5. Jadi mean lebih kecil " +
+          "daripada median. Modus juga berubah: sebelumnya tidak ada, sekarang 100."
       },
       {
         q: "Data tinggi badan: 150, 152, 155, 155, 158, 160, 160, 160, 165. Modus data tersebut adalah...",
@@ -701,7 +762,7 @@
       },
       {
         q: "Diketahui mean dari 9 data adalah 12. Jika satu data bernilai 20 dihapus, mean data yang tersisa adalah...",
-        opsi: ["10", "11", "11.5", "12"],
+        opsi: ["10", "11", "11,5", "12"],
         jawaban: 1,
         indikator: "Menganalisis perubahan mean saat data diubah.",
         level: "Level 4: Analisis",
@@ -765,7 +826,7 @@
     campuran: [
       {
         q: "Data: 5, 7, 7, 8, 9, 10. Nilai modus dan median berturut-turut adalah...",
-        opsi: ["7 dan 7.5", "7 dan 8", "8 dan 7.5", "7.5 dan 7"],
+        opsi: ["7 dan 7,5", "7 dan 8", "8 dan 7,5", "7,5 dan 7"],
         jawaban: 0,
         indikator: "Menentukan modus dan median dari satu set data.",
         level: "Level 2: Pemahaman",
@@ -775,7 +836,7 @@
       },
       {
         q: "Nilai rata-rata 15 siswa adalah 80. Jika satu siswa dengan nilai 95 keluar dari kelompok, rata-rata menjadi...",
-        opsi: ["78.9", "79.5", "80", "80.5"],
+        opsi: ["78,9", "79,5", "80", "80,5"],
         jawaban: 0,
         indikator: "Menganalisis pengaruh pengurangan data terhadap mean.",
         level: "Level 4: Analisis",
@@ -1119,12 +1180,12 @@
           : picked === soal.jawaban
           ? "#1e8740"
           : "#c53030";
-        var jawabSiswa = answered ? LETTERS[picked] + ". " + soal.opsi[picked] : "—";
+        var jawabSiswa = answered ? LETTERS[picked] + ". " + escapeHTML(soal.opsi[picked]) : "—";
 
         return (
           '<tr style="border-bottom:1px solid #e8ecf3;">' +
             '<td style="padding:8px 6px;vertical-align:top;">' + (idx + 1) + "</td>" +
-            '<td style="padding:8px 6px;vertical-align:top;">' + soal.q + "</td>" +
+            '<td style="padding:8px 6px;vertical-align:top;">' + escapeHTML(soal.q) + "</td>" +
             '<td style="padding:8px 6px;vertical-align:top;">' + jawabSiswa + "</td>" +
             '<td style="padding:8px 6px;vertical-align:top;font-weight:700;color:' +
               statusColor + ';">' + status + "</td>" +
@@ -1136,13 +1197,13 @@
     wrap.innerHTML =
       '<h1 style="margin:0 0 4px;font-size:22px;">Laporan Hasil Evaluasi — StatiVerse</h1>' +
       '<p style="margin:0 0 16px;color:#56617a;font-size:13px;">Paket: <strong>' +
-        (quiz.pack ? quiz.pack.title : "-") + "</strong> · Tanggal: " +
+        escapeHTML(quiz.pack ? quiz.pack.title : "-") + "</strong> · Tanggal: " +
         new Date().toLocaleDateString("id-ID", { dateStyle: "long" }) + "</p>" +
       '<table style="width:100%;margin-bottom:18px;font-size:13px;border-collapse:collapse;">' +
         '<tr><td style="padding:6px 0;"><strong>Nama</strong></td><td>' +
-          (siswa ? siswa.nama : "-") + "</td></tr>" +
+          escapeHTML(siswa ? siswa.nama : "-") + "</td></tr>" +
         '<tr><td style="padding:6px 0;"><strong>Kelas</strong></td><td>' +
-          (siswa ? siswa.kelas : "-") + "</td></tr>" +
+          escapeHTML(siswa ? siswa.kelas : "-") + "</td></tr>" +
         '<tr><td style="padding:6px 0;"><strong>Skor</strong></td><td>' +
           t.benar + " benar · " + t.salah + " salah · " + t.total + " soal (" + persen + "%)" +
         "</td></tr>" +
@@ -1181,12 +1242,10 @@
     var namaFile =
       "Laporan-Evaluasi-StatiVerse-" + (quiz.pack ? quiz.pack.title : "Kuis") + ".pdf";
 
-    // Sisipkan sementara ke DOM agar html2pdf bisa mengukur elemen
-    element.style.position = "fixed";
-    element.style.left = "-9999px";
-    element.style.top = "0";
-    element.style.width = "820px";
-    document.body.appendChild(element);
+    // Jangan diposisikan di luar layar: html2pdf menyalin elemen beserta
+    // style inline-nya, sehingga posisi -9999px membuat PDF kosong.
+    // html2pdf sendiri yang menempelkan salinan elemen ke DOM.
+    element.style.width = "794px";
 
     btnUnduh.disabled = true;
     btnUnduh.textContent = "Menyiapkan PDF…";
@@ -1194,11 +1253,12 @@
     window
       .html2pdf()
       .set({
-        margin: 0,
+        margin: [24, 0, 24, 0],
         filename: namaFile,
         image: { type: "jpeg", quality: 0.98 },
         html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
-        jsPDF: { unit: "pt", format: "a4", orientation: "portrait" }
+        jsPDF: { unit: "pt", format: "a4", orientation: "portrait" },
+        pagebreak: { mode: ["css", "legacy"], avoid: "tr" }
       })
       .from(element)
       .save()
@@ -1206,7 +1266,6 @@
         window.alert("Gagal membuat PDF. Silakan coba lagi.");
       })
       .then(function () {
-        element.remove();
         btnUnduh.disabled = false;
         btnUnduh.innerHTML = originalHTML;
       });
@@ -1218,11 +1277,320 @@
 
   /* ---------- 9. SINKRONISASI JUMLAH SOAL ---------- */
   // Card paket menampilkan jumlah soal sesuai isi bank soal sebenarnya
+  // (dirender sekali, setelah jumlah soal disinkronkan)
   EVAL_PACKS.forEach(function (pack) {
     if (QUESTION_BANK[pack.id]) {
       pack.soal = QUESTION_BANK[pack.id].length;
     }
   });
   renderEvalCards();
+
+  /* ---------- 10. SIMULASI DATA ---------- */
+
+  var dataInput = document.getElementById("data-input");
+  var btnAnalisis = document.getElementById("btn-analisis");
+  var btnReset = document.getElementById("btn-reset");
+  var resultCount = document.getElementById("result-count");
+  var resultMean = document.getElementById("result-mean");
+  var resultMedian = document.getElementById("result-median");
+  var resultModus = document.getElementById("result-modus");
+  var resultNote = document.getElementById("result-note");
+  var chartArea = document.getElementById("chart-area");
+  var lastData = null;
+
+  var NOTE_DEFAULT = resultNote ? resultNote.textContent.trim() : "";
+  var CHART_DEFAULT = chartArea ? chartArea.innerHTML : "";
+
+  var SAMPLE_DATA = {
+    "Nilai ulangan": "7, 8, 6, 9, 10, 8, 7, 8",
+    "Tinggi badan": "150, 152, 155, 155, 158, 160, 160, 160, 165",
+    "Nilai ekstrem": "70, 72, 75, 75, 78, 80, 20"
+  };
+
+  /** Format angka gaya Indonesia (koma desimal, maks. 2 angka di belakang koma). */
+  function fmt(n) {
+    return Number(n).toLocaleString("id-ID", { maximumFractionDigits: 2 });
+  }
+
+  /**
+   * Ubah teks menjadi array angka.
+   * @returns {{values:number[], invalid:string[]}}
+   */
+  function parseData(text) {
+    var tokens = text.split(/[\s,;]+/).filter(Boolean);
+    var values = [];
+    var invalid = [];
+    tokens.forEach(function (tok) {
+      var n = /^[-+]?(\d+\.?\d*|\.\d+)$/.test(tok) ? Number(tok) : NaN;
+      if (isFinite(n)) {
+        values.push(n);
+      } else {
+        invalid.push(tok);
+      }
+    });
+    return { values: values, invalid: invalid };
+  }
+
+  /** Hitung mean, median, modus, dan tabel frekuensi. */
+  function analyze(values) {
+    var sorted = values.slice().sort(function (a, b) {
+      return a - b;
+    });
+    var n = sorted.length;
+    var sum = sorted.reduce(function (acc, v) {
+      return acc + v;
+    }, 0);
+    var mid = Math.floor(n / 2);
+    var median = n % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+
+    var freqMap = {};
+    var distinct = [];
+    sorted.forEach(function (v) {
+      if (!freqMap.hasOwnProperty(v)) {
+        freqMap[v] = 0;
+        distinct.push(v);
+      }
+      freqMap[v] += 1;
+    });
+    var freqs = distinct.map(function (v) {
+      return freqMap[v];
+    });
+    var maxFreq = Math.max.apply(null, freqs);
+    // Tidak ada modus bila semua nilai berfrekuensi sama
+    var modes =
+      distinct.length > 1 && freqs.every(function (f) { return f === maxFreq; })
+        ? []
+        : distinct.filter(function (v) { return freqMap[v] === maxFreq; });
+
+    return {
+      n: n,
+      sum: sum,
+      mean: sum / n,
+      median: median,
+      modes: modes,
+      maxFreq: maxFreq,
+      distinct: distinct,
+      freqs: freqs,
+      min: sorted[0],
+      max: sorted[n - 1]
+    };
+  }
+
+  /** Gambar diagram batang frekuensi + garis mean (SVG). */
+  function renderChart(res) {
+    if (!chartArea) {
+      return;
+    }
+    var W = Math.max(chartArea.clientWidth || 0, 280);
+    var H = 200;
+    var padL = 28;
+    var padR = 12;
+    var padT = 22;
+    var padB = 28;
+    var plotW = W - padL - padR;
+    var plotH = H - padT - padB;
+    var k = res.distinct.length;
+    var slot = plotW / k;
+    var barW = Math.min(40, slot * 0.7);
+    var labelStep = Math.ceil(k / Math.max(1, Math.floor(plotW / 34)));
+
+    function xCenter(i) {
+      return padL + slot * i + slot / 2;
+    }
+
+    var parts = [];
+    var yTicks = Math.min(res.maxFreq, 5);
+    for (var t = 0; t <= yTicks; t += 1) {
+      var fv = Math.round((res.maxFreq * t) / yTicks);
+      var yy = padT + plotH - (fv / res.maxFreq) * plotH;
+      parts.push(
+        '<line class="chart__grid" x1="' + padL + '" x2="' + (W - padR) + '" y1="' + yy + '" y2="' + yy + '"/>' +
+        '<text class="chart__axis" x="' + (padL - 6) + '" y="' + (yy + 4) + '" text-anchor="end">' + fv + "</text>"
+      );
+    }
+
+    res.distinct.forEach(function (v, i) {
+      var h = (res.freqs[i] / res.maxFreq) * plotH;
+      var x = xCenter(i) - barW / 2;
+      var y = padT + plotH - h;
+      var isMode = res.modes.indexOf(v) !== -1;
+      parts.push(
+        '<rect class="chart__bar' + (isMode ? " is-mode" : "") + '" x="' + x + '" y="' + y +
+          '" width="' + barW + '" height="' + h + '" rx="4">' +
+          "<title>" + fmt(v) + ": " + res.freqs[i] + " kali</title></rect>"
+      );
+      if (i % labelStep === 0) {
+        parts.push(
+          '<text class="chart__axis" x="' + xCenter(i) + '" y="' + (H - 9) + '" text-anchor="middle">' +
+            fmt(v) + "</text>"
+        );
+      }
+    });
+
+    // Posisi garis mean: interpolasi di antara dua kategori yang mengapitnya
+    var mx = xCenter(0);
+    for (var j = 0; j < k - 1; j += 1) {
+      if (res.mean >= res.distinct[j] && res.mean <= res.distinct[j + 1]) {
+        var frac = (res.mean - res.distinct[j]) / (res.distinct[j + 1] - res.distinct[j]);
+        mx = xCenter(j) + frac * slot;
+        break;
+      }
+    }
+    parts.push(
+      '<line class="chart__mean" x1="' + mx + '" x2="' + mx + '" y1="' + (padT - 6) + '" y2="' + (padT + plotH) + '"/>' +
+      '<text class="chart__mean-label" x="' + mx + '" y="' + (padT - 9) + '" text-anchor="middle">x̄ = ' +
+        fmt(res.mean) + "</text>"
+    );
+
+    chartArea.classList.add("is-filled");
+    chartArea.innerHTML =
+      '<svg class="chart" width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + " " + H +
+      '" aria-hidden="true">' + parts.join("") + "</svg>";
+    chartArea.setAttribute(
+      "aria-label",
+      "Diagram batang frekuensi " + k + " nilai berbeda, dengan garis mean di " + fmt(res.mean)
+    );
+  }
+
+  function setNote(text, isError) {
+    if (resultNote) {
+      resultNote.textContent = text;
+      resultNote.classList.toggle("is-error", !!isError);
+    }
+  }
+
+  function resetResults() {
+    lastData = null;
+    if (resultCount) {
+      resultCount.textContent = "0 data terdeteksi";
+    }
+    [resultMean, resultMedian, resultModus].forEach(function (el) {
+      if (el) {
+        el.textContent = "—";
+      }
+    });
+    if (chartArea) {
+      chartArea.classList.remove("is-filled");
+      chartArea.innerHTML = CHART_DEFAULT;
+      chartArea.setAttribute("aria-label", "Area grafik distribusi data");
+    }
+    setNote(NOTE_DEFAULT, false);
+  }
+
+  function runAnalysis() {
+    if (!dataInput) {
+      return;
+    }
+    var parsed = parseData(dataInput.value);
+
+    if (parsed.invalid.length) {
+      resetResults();
+      setNote(
+        "Ada isian yang bukan angka: " + parsed.invalid.slice(0, 5).join(", ") +
+          ". Gunakan titik untuk desimal (mis. 7.5) dan pisahkan data dengan koma atau spasi.",
+        true
+      );
+      return;
+    }
+    if (parsed.values.length < 3) {
+      resetResults();
+      setNote("Masukkan minimal 3 angka untuk dianalisis.", true);
+      return;
+    }
+
+    var res = analyze(parsed.values);
+    lastData = res;
+
+    if (resultCount) {
+      resultCount.textContent = res.n + " data terdeteksi";
+    }
+    if (resultMean) {
+      resultMean.textContent = fmt(res.mean);
+    }
+    if (resultMedian) {
+      resultMedian.textContent = fmt(res.median);
+    }
+    if (resultModus) {
+      resultModus.textContent = res.modes.length ? res.modes.map(fmt).join("; ") : "Tidak ada";
+    }
+
+    renderChart(res);
+
+    var modusText = res.modes.length
+      ? "modus " + res.modes.map(fmt).join("; ") + " (muncul " + res.maxFreq + " kali)"
+      : "tidak ada modus karena semua nilai muncul sama banyak";
+    var compare =
+      Math.abs(res.mean - res.median) < 1e-9
+        ? "Mean sama dengan median, data cenderung simetris."
+        : res.mean < res.median
+        ? "Mean lebih kecil dari median — ada nilai rendah yang menarik rata-rata ke bawah (condong ke kiri)."
+        : "Mean lebih besar dari median — ada nilai tinggi yang menarik rata-rata ke atas (condong ke kanan).";
+
+    setNote(
+      "Jumlah data " + fmt(res.sum) + " dari " + res.n + " nilai, sehingga mean = " +
+        fmt(res.sum) + " ÷ " + res.n + " = " + fmt(res.mean) + ". Median " + fmt(res.median) +
+        ", " + modusText + ". " + compare,
+      false
+    );
+  }
+
+  if (btnAnalisis) {
+    btnAnalisis.addEventListener("click", runAnalysis);
+  }
+
+  if (dataInput) {
+    // Ctrl/Cmd + Enter untuk analisis cepat
+    dataInput.addEventListener("keydown", function (event) {
+      if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
+        event.preventDefault();
+        runAnalysis();
+      }
+    });
+  }
+
+  if (btnReset) {
+    btnReset.addEventListener("click", function () {
+      if (dataInput) {
+        dataInput.value = "";
+        dataInput.focus();
+      }
+      resetResults();
+    });
+  }
+
+  Array.prototype.slice
+    .call(document.querySelectorAll(".simulate .chip--btn"))
+    .forEach(function (chip) {
+      chip.addEventListener("click", function () {
+        var sample = SAMPLE_DATA[chip.textContent.trim()];
+        if (sample && dataInput) {
+          dataInput.value = sample;
+          runAnalysis();
+        }
+      });
+    });
+
+  // Gambar ulang grafik saat lebar berubah
+  var chartResizeTimer = null;
+  window.addEventListener("resize", function () {
+    window.clearTimeout(chartResizeTimer);
+    chartResizeTimer = window.setTimeout(function () {
+      if (lastData) {
+        renderChart(lastData);
+      }
+    }, 200);
+  });
+
+  /* ---------- 11. TOMBOL KUIS DI DASHBOARD ---------- */
+  var btnMulaiKuisDash = document.getElementById("btn-mulai-kuis");
+  if (btnMulaiKuisDash) {
+    btnMulaiKuisDash.addEventListener("click", function () {
+      activateMenu("evaluasi");
+      var grid = document.getElementById("eval-grid");
+      if (grid) {
+        grid.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    });
+  }
 })();
 
