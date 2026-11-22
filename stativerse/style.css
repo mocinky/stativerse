@@ -2591,3 +2591,64 @@ button.icon-btn--menu,
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12) !important;
   border-radius: 10px !important;
 }
+
+/* ---------- Perbaikan: latar sidebar mobile terlihat saat terbuka ---------- */
+@media (max-width: 900px) {
+  .app:not(.is-sidebar-closed) .sidebar-scrim {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+/* ---------- Grafik simulasi data ---------- */
+.chartbox__area.is-filled {
+  display: block;
+  overflow: hidden;
+  border-style: solid;
+  background-image: none;
+}
+
+.chart {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.chart__grid {
+  stroke: #e8ecf3;
+  stroke-width: 1;
+}
+
+.chart__axis {
+  fill: var(--color-text-muted);
+  font-size: 11px;
+  font-family: inherit;
+}
+
+.chart__bar {
+  fill: var(--color-blue);
+  opacity: 0.75;
+}
+
+.chart__bar.is-mode {
+  opacity: 1;
+}
+
+.chart__mean {
+  stroke: var(--color-coral);
+  stroke-width: 2;
+  stroke-dasharray: 5 4;
+}
+
+.chart__mean-label {
+  fill: var(--color-coral-dark);
+  font-size: 11px;
+  font-weight: 700;
+  font-family: inherit;
+}
+
+.result__note.is-error {
+  border-left-color: #ea4335;
+  background-color: #fdecea;
+  color: #b3261e;
+}
